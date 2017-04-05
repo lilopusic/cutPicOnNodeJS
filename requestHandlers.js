@@ -80,6 +80,16 @@ function uploadCutPic(response, request) {
     var params = querystring.parse(postData); //解析 HEADER 中的数据
     var picInfo = params.info.replace(/^data:image\/png;base64,/, "");
     var uuid = uuidV4();
+    try {
+      var stat = fs.statSync("tmp");
+    } catch (err) {
+      if (stat && stat.isFile) {
+        console.log("目录存在");
+      } else {
+        fs.mkdirSync("tmp");
+      }
+    }
+
     fs.writeFileSync(`tmp/${uuid}.png`, picInfo, 'base64', function (err) {
       console.log(err);
     });
