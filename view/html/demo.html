@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta>
+    <meta name="layout" content="main">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <script type="text/javascript" src="../js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="../js/html2canvas.js"></script>
+    <script type="text/javascript" src="../js/cutPic.js"></script>
+</head>
+
+<body>
+    <div>
+        <div style="width: 1000px;height: 100px;background-color: brown;">
+            <p>hello~</p>
+        </div>
+        <div id="area" style="width: 1000px;height: auto;">
+            <p>hello world;</p>
+            <img src="../img/demo.jpg" alt="pic" style="width: 1000px;height: auto;">
+        </div>
+        <div style="width: 1000px;height: 100px;background-color: aqua;">
+            <p>hello~</p>
+        </div>
+    </div>
+    <script>
+        var option = {
+            //是否带有水印&&水印信息
+            haveWaterMark: true,
+            waterMark: "byHnayan",
+            waterMarkSize: 14,
+            waterMarkFontStyle: "Arial",
+            waterMarkColor: "green",
+            
+            //画笔信息
+            paintColor: "blue",
+            paintWidth: 3,
+            //重载方式
+            //simple为区域内使用js重载，不会涉及到服务器
+            //normal直接重载整个网页,会从服务器重新拉网页
+            reloadWay: "simple",
+            //边框信息
+            borderColor: "red",
+            borderWidth: 3,
+            //保存格式信息
+            downLoadType: "png",
+            downLoadName: "cutPic",
+            //上传回调函数
+            uploadFunc: function (base64URL) {
+                $.post("uploadCutPic", {
+                    "info": base64URL
+                }, function (data) {
+                    alert("Your UUID is " + data);
+                });
+            }
+        };
+        $(document).ready(function () {
+            //截图工具区域的大小就是调用插件的元素的大小；如这里就是1000px,auto;
+            $("#area").cutPic(option);
+        });
+    </script>
+</body>
+
+</html>
