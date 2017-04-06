@@ -92,6 +92,10 @@ function uploadCutPic(response, request) {
   });
 }
 
+function findPicByUUID(response, request) {
+  
+}
+
 module.exports = {
   start: start,
   upload: upload,
