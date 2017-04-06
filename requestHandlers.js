@@ -4,8 +4,6 @@ var querystring = require("querystring"),
   uuidV4 = require("uuid/v4");
 
 function start(response) {
-  console.log("Request handler 'start' was called.");
-
   var body = '<html>' +
     '<head>' +
     '<meta http-equiv="Content-Type" content="text/html; ' +
@@ -28,8 +26,6 @@ function start(response) {
 }
 
 function upload(response, request) {
-  console.log("Request handler 'upload' was called.");
-
   var form = new formidable.IncomingForm();
   form.uploadDir = ".";
   console.log("about to parse");
@@ -46,7 +42,6 @@ function upload(response, request) {
 }
 
 function show(response) {
-  console.log("Request handler 'show' was called.");
   fs.readFile("tmp/test.png", "binary", function (error, file) {
     if (error) {
       response.writeHead(500, {
