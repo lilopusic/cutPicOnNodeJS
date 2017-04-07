@@ -142,7 +142,7 @@ $(document).ready(function () {
      }
      这部分装进原来的目标区域,在此之前原来的目标区域已被清空并被备份到srcHtml中
      */
-    let createContainer = function (canvas) {
+    let createContainer = (canvas) => {
         //设置原图
         image.src = canvas.toDataURL();
         let width = wholeWidth;
@@ -183,7 +183,7 @@ $(document).ready(function () {
     };
 
     //核心函数,用于绑定各种事件,初始化各种值
-    let loadCtx = function () {
+    let loadCtx = () => {
 
         //1.初始化各种对象
         initialDomAndContext();
