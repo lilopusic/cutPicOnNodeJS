@@ -73,7 +73,8 @@ function uploadCutPic(response, request) {
   // 数据接收完毕, 执行回调函数
   request.addListener("end", function () {
     var params = querystring.parse(postData); //解析 HEADER 中的数据
-    var picInfo = params.info.replace(/^data:image\/png;base64,/, "");
+    var picType = params.picType;
+    var picInfo = params.info.replace(/^data:image\/png;base64,/, "").replace(/^data:image\/jpeg;base64,/, "");
     var uuid = uuidV4();
     try {
       var stat = fs.statSync("tmp");
@@ -85,7 +86,7 @@ function uploadCutPic(response, request) {
       }
     }
 
-    fs.writeFileSync(`tmp/${uuid}.png`, picInfo, 'base64', function (err) {
+    fs.writeFileSync(`tmp/${uuid}.${picType}`, picInfo, 'base64', function (err) {
       console.log(err);
     });
     response.end(uuid);
@@ -97,9 +98,5 @@ function findPicByUUID(response, request) {
 }
 
 module.exports = {
-  start: start,
-  upload: upload,
-  show: show,
-  cutPicDemo: cutPicDemo,
-  uploadCutPic: uploadCutPic
+  start, upload, show, cutPicDemo, uploadCutPic
 }

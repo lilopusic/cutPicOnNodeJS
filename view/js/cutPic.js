@@ -92,15 +92,26 @@ $(document).ready(function () {
     //记录重载的方式,默认simple
     let reloadWay = "simple";
     let uploadFuc = null;
-
+    //下载的默认格式为png
+    let downloadType = 'png';
+    //下载的默认名字为cutPic
+    let downloadName = 'cutPic';
     //入口
     jQuery.fn.cutPic = function (userOptions) {
+
+        //弹出框需要用到的外部js
+        document.write("<script language='javascript' src='../js/layer.js'></script>");
         //用户自定义配置赋值
         options = userOptions;
         //上传回调函数独立出来
         uploadFuc = userOptions.uploadFunc || function () {
             alert("you have not define a func");
         };
+        //下载格式独立出来
+        downloadType = options.downloadType || 'png';
+
+        //下载名字也独立出来
+        downloadName = options.downloadName || 'cutPic';
         //获得当前Dom
         currentDom = this.get(0);
 
@@ -289,7 +300,7 @@ $(document).ready(function () {
             }
             //上传
             if (x > 0 && x < 30 && y < (c2.height / 2 + 360 - toolbarOffset) && y > (c2.height / 2 + 330 - toolbarOffset)) {
-                uploadFuc(getCutPicBase64());
+                uploadFuc(getCutPicBase64(), downloadType);
             }
             //添加矩形
             if (x > 0 && x < 30 && y < (c2.height / 2 + 390 - toolbarOffset) && y > (c2.height / 2 + 360 - toolbarOffset)) {
@@ -316,7 +327,7 @@ $(document).ready(function () {
         downloadCanvas.height = cutPicCanvas.height;
         let downloadCanvasCtx = downloadCanvas.getContext("2d");
         downloadCanvasCtx.putImageData(imageData, 0, 0);
-        return downloadCanvas.toDataURL();
+        return downloadCanvas.toDataURL(`image\/${downloadType}`, 1.0);
         $(downloadCanvas).remove();
     }
 
@@ -702,7 +713,7 @@ $(document).ready(function () {
     //下载截好的图片
     function downloadPic() {
 
-        downloadURI(getCutPicBase64(), "cutPic.png");
+        downloadURI(getCutPicBase64(), `${downloadName}.${downloadType}`);
 
     }
 

@@ -5,7 +5,7 @@
     <meta>
     <meta name="layout" content="main">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script type="text/javascript" src="../js/jquery-1.8.3.min.js"></script>
+    <script type="text/javascript" src="../js/jquery-3.2.0.min.js"></script>
     <script type="text/javascript" src="../js/html2canvas.js"></script>
     <script type="text/javascript" src="../js/cutPic.js"></script>
 </head>
@@ -31,7 +31,7 @@
             waterMarkSize: 14,
             waterMarkFontStyle: "Arial",
             waterMarkColor: "green",
-            
+
             //画笔信息
             paintColor: "blue",
             paintWidth: 3,
@@ -43,12 +43,13 @@
             borderColor: "red",
             borderWidth: 3,
             //保存格式信息
-            downLoadType: "png",
-            downLoadName: "cutPic",
+            downLoadType: "jpeg",
+            downLoadName: "myPicture",
             //上传回调函数
-            uploadFunc: function (base64URL) {
+            uploadFunc: (base64URL, type) => {
                 $.post("uploadCutPic", {
-                    "info": base64URL
+                    "info": base64URL,
+                    "picType": type
                 }, function (data) {
                     alert("Your UUID is " + data);
                 });
