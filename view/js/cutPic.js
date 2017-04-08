@@ -88,7 +88,7 @@ $(document).ready(function () {
     //用户配置项对象
     let options;
     //工具栏的偏移距离
-    let toolbarOffset = 200;
+    let toolbarOffset = 150;
     //记录重载的方式,默认simple
     let reloadWay = "simple";
     let uploadFuc = null;
@@ -99,14 +99,29 @@ $(document).ready(function () {
     //入口
     jQuery.fn.cutPic = function (userOptions) {
 
-        //弹出框需要用到的外部js
-        document.write("<script language='javascript' src='../js/layer.js'></script>");
         //用户自定义配置赋值
         options = userOptions;
         //上传回调函数独立出来
         uploadFuc = userOptions.uploadFunc || function () {
             alert("you have not define a func");
         };
+
+        //如果传入字符串调用内置方法
+        if (typeof uploadFuc !== 'function') {
+            switch (uploadFuc) {
+                case 'nodeJS':
+                    uploadFuc = uploadNodeJS;
+                    break;
+
+                default:
+                    uploadFuc = () => {
+                        layer.open({
+                            content: '没有找到对应上传方法'
+                        });
+                    }
+                    break;
+            }
+        }
         //下载格式独立出来
         downloadType = options.downloadType || 'png';
 
@@ -253,10 +268,45 @@ $(document).ready(function () {
             let position = getEventPosition(event);
             let x = position.x,
                 y = position.y;
+
+            //左侧功能
             //处理取消截图事件
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 30 - toolbarOffset) && y > (c2.height / 2 - toolbarOffset)) {
+            if (x > c2.width - 30 && x < c2.width && y < (c2.height / 2 + 60 - toolbarOffset) && y > (c2.height / 2 + 30- toolbarOffset)) {
                 cancelCutPic();
             }
+            //回到原网页
+            if (x > c2.width - 30 && x < c2.width && y < (c2.height / 2 + 90 - toolbarOffset) && y > (c2.height / 2 + 60 - toolbarOffset)) {
+                backToSource();
+            }
+            //下载图片
+            if (x > c2.width - 30 && x < c2.width && y < (c2.height / 2 + 120 - toolbarOffset) && y > (c2.height / 2 + 90 - toolbarOffset)) {
+                downloadPic();
+            }
+            //上传
+            if (x > c2.width - 30 && x < c2.width && y < (c2.height / 2 + 150 - toolbarOffset) && y > (c2.height / 2 + 120 - toolbarOffset)) {
+                uploadFuc(getCutPicBase64(), downloadType, (name, chooseType) => {
+                    $.post("uploadCutPic", {
+                        "info": getCutPicBase64(chooseType),
+                        "picType": chooseType
+                    }, function (data) {
+                        layer.open({
+                            btn: '去下载!',
+                            title: 'Your UUID',
+                            content: data,
+                            yes: (index, layero) => {
+                                let _href = 'findPicByUUID';
+                                $('body').append('<a href="" id="goto" target="_blank"></a>');
+                                $('#goto').attr('href', _href);
+                                $('#goto').get(0).click();
+                                $('#goto').remove();
+                                layer.close(index);
+                            }
+                        });
+                    });
+                });
+            }
+
+            //左边功能
             //向右旋转
             if (x > 0 && x < 30 && y < (c2.height / 2 + 60 - toolbarOffset) && y > (c2.height / 2 + 30 - toolbarOffset)) {
                 rotatePicRight();
@@ -277,38 +327,28 @@ $(document).ready(function () {
             if (x > 0 && x < 30 && y < (c2.height / 2 + 180 - toolbarOffset) && y > (c2.height / 2 + 150 - toolbarOffset)) {
                 resolveMosaic();
             }
-            //回到原网页
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 210 - toolbarOffset) && y > (c2.height / 2 + 180 - toolbarOffset)) {
-                backToSource();
-            }
-            //下载图片
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 240 - toolbarOffset) && y > (c2.height / 2 + 210 - toolbarOffset)) {
-                downloadPic();
-            }
+
             //涂鸦
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 270 - toolbarOffset) && y > (c2.height / 2 + 240 - toolbarOffset)) {
+            if (x > 0 && x < 30 && y < (c2.height / 2 + 210 - toolbarOffset) && y > (c2.height / 2 + 180 - toolbarOffset)) {
                 paintInPaintCanvas();
                 isDraw = true;
             }
             //反色
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 300 - toolbarOffset) && y > (c2.height / 2 + 270 - toolbarOffset)) {
+            if (x > 0 && x < 30 && y < (c2.height / 2 + 240 - toolbarOffset) && y > (c2.height / 2 + 210 - toolbarOffset)) {
                 reservePic();
             }
             //加边框
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 330 - toolbarOffset) && y > (c2.height / 2 + 300 - toolbarOffset)) {
+            if (x > 0 && x < 30 && y < (c2.height / 2 + 270 - toolbarOffset) && y > (c2.height / 2 + 240 - toolbarOffset)) {
                 addBorder();
             }
-            //上传
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 360 - toolbarOffset) && y > (c2.height / 2 + 330 - toolbarOffset)) {
-                uploadFuc(getCutPicBase64(), downloadType);
-            }
+
             //添加矩形
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 390 - toolbarOffset) && y > (c2.height / 2 + 360 - toolbarOffset)) {
+            if (x > 0 && x < 30 && y < (c2.height / 2 + 300 - toolbarOffset) && y > (c2.height / 2 + 270 - toolbarOffset)) {
                 paintInPaintCanvas();
                 isDrawRect = true;
             }
             //添加圆形
-            if (x > 0 && x < 30 && y < (c2.height / 2 + 420 - toolbarOffset) && y > (c2.height / 2 + 390 - toolbarOffset)) {
+            if (x > 0 && x < 30 && y < (c2.height / 2 + 330 - toolbarOffset) && y > (c2.height / 2 + 300 - toolbarOffset)) {
                 paintInPaintCanvas();
                 isDrawCircle = true;
             }
@@ -320,14 +360,14 @@ $(document).ready(function () {
 
 
     //获取base64格式图片
-    function getCutPicBase64() {
+    function getCutPicBase64(type) {
         let imageData = ctxPic.getImageData(cutPicCanvas.left, cutPicCanvas.top, cutPicCanvas.width, cutPicCanvas.height);
         let downloadCanvas = document.createElement("canvas");
         downloadCanvas.width = cutPicCanvas.width;
         downloadCanvas.height = cutPicCanvas.height;
         let downloadCanvasCtx = downloadCanvas.getContext("2d");
         downloadCanvasCtx.putImageData(imageData, 0, 0);
-        return downloadCanvas.toDataURL(`image\/${downloadType}`, 1.0);
+        return downloadCanvas.toDataURL(`image\/${type}`, 1.0);
         $(downloadCanvas).remove();
     }
 
@@ -712,8 +752,32 @@ $(document).ready(function () {
 
     //下载截好的图片
     function downloadPic() {
+        let name;
+        let chooseType;
+        layer.prompt({
+            title: '输入名字并选择一种格式',
+            btn: ['png', 'jpeg', 'cancle'],
+            yes: function (index, layero) {
+                name = $('input').val() || 'cutPic';
+                chooseType = 'png';
+                layer.close(index);
+                //获取用户输入值再上传/下载
+                downloadURI(getCutPicBase64(chooseType), `${name}.${chooseType}`);
+            },
+            btn2: function (index, layero) {
+                name = $('input').val() || 'cutPic';
+                chooseType = 'jpeg';
+                layer.close(index);
+                downloadURI(getCutPicBase64(chooseType), `${name}.${chooseType}`);
+            },
+            btn3: function (index, layero) {
+                layer.close(index);
+            },
+            cancel: function () {
 
-        downloadURI(getCutPicBase64(), `${downloadName}.${downloadType}`);
+            }
+        });
+
 
     }
 
@@ -893,13 +957,35 @@ $(document).ready(function () {
         let uploadImage = new Image();
         let addRectImage = new Image();
         let addCircleImage = new Image();
+
+        //右边
         //取消按钮
         closeImageObj.src = "../img/close.png";
         closeImageObj.onload = () => {
             //ctxPic.fillRect(0, c2.height/2 - 120, 30, 30);
-            ctxPic.drawImage(closeImageObj, 0, c2.height / 2 - toolbarOffset, 30, 30);
+            ctxPic.drawImage(closeImageObj, c2.width - 30, c2.height / 2 - toolbarOffset + 30, 30, 30);
         };
 
+        //回到原来的网页
+        backImage.src = "../img/back.png";
+        backImage.onload = () => {
+            //ctxPic.fillRect(0, c2.height/2 + 150 - 120, 30, 30);
+            ctxPic.drawImage(backImage, c2.width - 30, c2.height / 2 + 30 - toolbarOffset + 30, 30, 30);
+        };
+
+        //保存图片
+        downloadImage.src = "../img/download.png";
+        downloadImage.onload = () => {
+            ctxPic.drawImage(downloadImage, c2.width - 30, c2.height / 2 + 60 - toolbarOffset + 30, 30, 30);
+        };
+
+        //上传图片
+        uploadImage.src = "../img/upload.png";
+        uploadImage.onload = () => {
+            ctxPic.drawImage(uploadImage, c2.width - 30, c2.height / 2 + 90 - toolbarOffset + 30, 30, 30)
+        };
+
+        //左边
         //顺时针旋转
         rotateRightImage.src = "../img/rotateRight.png";
         rotateRightImage.onload = () => {
@@ -933,53 +1019,34 @@ $(document).ready(function () {
             ctxPic.drawImage(mosaicImage, 0, c2.height / 2 + 150 - toolbarOffset, 30, 30);
         };
 
-        //回到原来的网页
-        backImage.src = "../img/back.png";
-        backImage.onload = () => {
-            //ctxPic.fillRect(0, c2.height/2 + 150 - 120, 30, 30);
-            ctxPic.drawImage(backImage, 0, c2.height / 2 + 180 - toolbarOffset, 30, 30);
-        };
-
-        //保存图片
-        downloadImage.src = "../img/download.png";
-        downloadImage.onload = () => {
-            ctxPic.drawImage(downloadImage, 0, c2.height / 2 + 210 - toolbarOffset, 30, 30);
-        };
-
         //涂个鸦？
         paintImage.src = "../img/paint.png";
         paintImage.onload = () => {
-            ctxPic.drawImage(paintImage, 0, c2.height / 2 + 240 - toolbarOffset, 30, 30);
+            ctxPic.drawImage(paintImage, 0, c2.height / 2 + 180 - toolbarOffset, 30, 30);
         };
 
         //反个色？
         reverseImage.src = "../img/reverse.png";
         reverseImage.onload = () => {
-            ctxPic.drawImage(reverseImage, 0, c2.height / 2 + 270 - toolbarOffset, 30, 30)
+            ctxPic.drawImage(reverseImage, 0, c2.height / 2 + 210 - toolbarOffset, 30, 30)
         };
 
         //加个边框？
         addBorderImage.src = "../img/boder.png";
         addBorderImage.onload = () => {
-            ctxPic.drawImage(addBorderImage, 0, c2.height / 2 + 300 - toolbarOffset, 30, 30)
-        };
-
-        //上传图片
-        uploadImage.src = "../img/upload.png";
-        uploadImage.onload = () => {
-            ctxPic.drawImage(uploadImage, 0, c2.height / 2 + 330 - toolbarOffset, 30, 30)
+            ctxPic.drawImage(addBorderImage, 0, c2.height / 2 + 240 - toolbarOffset, 30, 30)
         };
 
         //添加矩形
         addRectImage.src = "../img/addRect.png";
         addRectImage.onload = () => {
-            ctxPic.drawImage(addRectImage, 0, c2.height / 2 + 360 - toolbarOffset, 30, 30)
+            ctxPic.drawImage(addRectImage, 0, c2.height / 2 + 270 - toolbarOffset, 30, 30)
         };
 
         //添加圆形
         addCircleImage.src = "../img/addCircle.png";
         addCircleImage.onload = () => {
-            ctxPic.drawImage(addCircleImage, 0, c2.height / 2 + 390 - toolbarOffset, 30, 30)
+            ctxPic.drawImage(addCircleImage, 0, c2.height / 2 + 300 - toolbarOffset, 30, 30)
         }
     }
 
@@ -1258,5 +1325,34 @@ $(document).ready(function () {
         ctx.bezierCurveTo(xm - ox, ye, x, ym + oy, x, ym);
         //ctx.closePath(); // not used correctly, see comments (use to close off open path)
         ctx.stroke();
+    }
+
+    //上传方法
+    function uploadNodeJS(base64URL, type, callback) {
+        let name;
+        let chooseType;
+        layer.open({
+            title: "选择格式",
+            btn: ['png', 'jpeg', 'cancle'],
+            yes: function (index, layero) {
+                name = $('input').val()
+                chooseType = 'png';
+                layer.close(index);
+                //回调，获取用户输入值再上传/下载
+                callback(name, chooseType);
+            },
+            btn2: function (index, layero) {
+                name = $('input').val()
+                chooseType = 'jpeg';
+                layer.close(index);
+                callback(name, chooseType);
+            },
+            btn3: function (index, layero) {
+                layer.close(index);
+            },
+            cancel: function () {
+
+            }
+        });
     }
 });

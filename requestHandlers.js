@@ -94,9 +94,9 @@ function uploadCutPic(response, request) {
 }
 
 function findPicByUUID(response, request) {
-  
+  response.end("welcome~");
 }
 
 module.exports = {
-  start, upload, show, cutPicDemo, uploadCutPic
+  start, upload, show, cutPicDemo, uploadCutPic, findPicByUUID
 }

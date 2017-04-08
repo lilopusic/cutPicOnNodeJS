@@ -7,6 +7,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <script type="text/javascript" src="../js/jquery-3.2.0.min.js"></script>
     <script type="text/javascript" src="../js/html2canvas.js"></script>
+    <script type="text/javascript" src="../layer/layer.js"></script>
     <script type="text/javascript" src="../js/cutPic.js"></script>
 </head>
 
@@ -43,21 +44,19 @@
             borderColor: "red",
             borderWidth: 3,
             //保存格式信息
-            downLoadType: "jpeg",
-            downLoadName: "myPicture",
-            //上传回调函数
-            uploadFunc: (base64URL, type) => {
-                $.post("uploadCutPic", {
-                    "info": base64URL,
-                    "picType": type
-                }, function (data) {
-                    alert("Your UUID is " + data);
-                });
-            }
+            downloadType: "jpeg",
+            downloadName: "myPicture",
+            //上传回调函数,直接定义函数或是使用内置上传功能
+            uploadFunc: "nodeJS"
+
         };
         $(document).ready(function () {
             //截图工具区域的大小就是调用插件的元素的大小；如这里就是1000px,auto;
             $("#area").cutPic(option);
+
+            function OnInput(event) {
+                alert("The new content: " + event.target.value);
+            }
         });
     </script>
 </body>
