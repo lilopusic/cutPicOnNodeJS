@@ -8,6 +8,7 @@
     <script type="text/javascript" src="../js/jquery-3.2.0.min.js"></script>
     <script type="text/javascript" src="../js/html2canvas.js"></script>
     <script type="text/javascript" src="../layer/layer.js"></script>
+    <script type="text/javascript" src="../js/CanvasInput.js"></script>
     <script type="text/javascript" src="../js/cutPic.js"></script>
 </head>
 
@@ -47,16 +48,34 @@
             downloadType: "jpeg",
             downloadName: "myPicture",
             //上传回调函数,直接定义函数或是使用内置上传功能
-            uploadFunc: "nodeJS"
+            //如果自己提供函数，插件会返回type,调用getCutPicBase64(type来获得baseURL)
+            //eg1:uploadFunc : (type) => {todo};
+            //eg2:uploadFunc : 'nodeJS'
+            uploadFunc: (chooseType, getBaseFunc) => {
+                $.post("uploadCutPic", {
+                    "info": getBaseFunc(chooseType),
+                    "picType": chooseType
+                }, function (data) {
+                    layer.open({
+                        btn: '去下载!',
+                        title: 'Your UUID',
+                        content: data,
+                        yes: (index, layero) => {
+                            let _href = 'findPicByUUID';
+                            $('body').append('<a href="" id="goto" target="_blank"></a>');
+                            $('#goto').attr('href', _href);
+                            $('#goto').get(0).click();
+                            $('#goto').remove();
+                            layer.close(index);
+                        }
+                    });
+                });
+            }
 
         };
         $(document).ready(function () {
             //截图工具区域的大小就是调用插件的元素的大小；如这里就是1000px,auto;
             $("#area").cutPic(option);
-
-            function OnInput(event) {
-                alert("The new content: " + event.target.value);
-            }
         });
     </script>
 </body>

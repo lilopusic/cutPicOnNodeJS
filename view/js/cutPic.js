@@ -91,7 +91,7 @@ $(document).ready(function () {
     let toolbarOffset = 150;
     //记录重载的方式,默认simple
     let reloadWay = "simple";
-    let uploadFuc = null;
+    let uploadFunc = null;
     //下载的默认格式为png
     let downloadType = 'png';
     //下载的默认名字为cutPic
@@ -99,22 +99,24 @@ $(document).ready(function () {
     //入口
     jQuery.fn.cutPic = function (userOptions) {
 
+        //别名
+        let _self = this;
         //用户自定义配置赋值
         options = userOptions;
         //上传回调函数独立出来
-        uploadFuc = userOptions.uploadFunc || function () {
+        uploadFunc = userOptions.uploadFunc || function () {
             alert("you have not define a func");
         };
 
         //如果传入字符串调用内置方法
-        if (typeof uploadFuc !== 'function') {
-            switch (uploadFuc) {
+        if (typeof uploadFunc !== 'function') {
+            switch (uploadFunc) {
                 case 'nodeJS':
-                    uploadFuc = uploadNodeJS;
+                    uploadFunc = uploadNodeJS;
                     break;
 
                 default:
-                    uploadFuc = () => {
+                    uploadFunc = () => {
                         layer.open({
                             content: '没有找到对应上传方法'
                         });
@@ -154,6 +156,9 @@ $(document).ready(function () {
                 });
             }
         }
+
+        //链式调用
+        return _self;
     };
 
     //造一个id为background的div元素用来装入图片
@@ -271,7 +276,7 @@ $(document).ready(function () {
 
             //左侧功能
             //处理取消截图事件
-            if (x > c2.width - 30 && x < c2.width && y < (c2.height / 2 + 60 - toolbarOffset) && y > (c2.height / 2 + 30- toolbarOffset)) {
+            if (x > c2.width - 30 && x < c2.width && y < (c2.height / 2 + 60 - toolbarOffset) && y > (c2.height / 2 + 30 - toolbarOffset)) {
                 cancelCutPic();
             }
             //回到原网页
@@ -284,26 +289,7 @@ $(document).ready(function () {
             }
             //上传
             if (x > c2.width - 30 && x < c2.width && y < (c2.height / 2 + 150 - toolbarOffset) && y > (c2.height / 2 + 120 - toolbarOffset)) {
-                uploadFuc(getCutPicBase64(), downloadType, (name, chooseType) => {
-                    $.post("uploadCutPic", {
-                        "info": getCutPicBase64(chooseType),
-                        "picType": chooseType
-                    }, function (data) {
-                        layer.open({
-                            btn: '去下载!',
-                            title: 'Your UUID',
-                            content: data,
-                            yes: (index, layero) => {
-                                let _href = 'findPicByUUID';
-                                $('body').append('<a href="" id="goto" target="_blank"></a>');
-                                $('#goto').attr('href', _href);
-                                $('#goto').get(0).click();
-                                $('#goto').remove();
-                                layer.close(index);
-                            }
-                        });
-                    });
-                });
+                chooseType(uploadFunc, getCutPicBase64);
             }
 
             //左边功能
@@ -352,6 +338,30 @@ $(document).ready(function () {
                 paintInPaintCanvas();
                 isDrawCircle = true;
             }
+            //添加文本框
+            if (x > 0 && x < 30 && y < (c2.height / 2 + 360 - toolbarOffset) && y > (c2.height / 2 + 330 - toolbarOffset)) {
+                paintInPaintCanvas();
+                //生成输入框实例
+                var input = new CanvasInput({
+                    canvas: paintC,
+                    fontSize: 18,
+                    fontFamily: 'Arial',
+                    fontColor: '#212121',
+                    fontWeight: 'bold',
+                    width: 300,
+                    padding: 8,
+                    borderWidth: 1,
+                    borderColor: '#000',
+                    borderRadius: 3,
+                    boxShadow: '1px 1px 0px #fff',
+                    innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
+                    placeHolder: 'Enter message here...',
+                    onsubmit: () => {
+                        alert('het~')
+                    }
+                });
+                input.focus();
+            }
             //阻止冒泡,避免了被currentDom捕捉到
             event.stopPropagation();
 
@@ -360,7 +370,8 @@ $(document).ready(function () {
 
 
     //获取base64格式图片
-    function getCutPicBase64(type) {
+    //暴露给外部
+    let getCutPicBase64 = (type) => {
         let imageData = ctxPic.getImageData(cutPicCanvas.left, cutPicCanvas.top, cutPicCanvas.width, cutPicCanvas.height);
         let downloadCanvas = document.createElement("canvas");
         downloadCanvas.width = cutPicCanvas.width;
@@ -957,7 +968,7 @@ $(document).ready(function () {
         let uploadImage = new Image();
         let addRectImage = new Image();
         let addCircleImage = new Image();
-
+        let inputImage = new Image();
         //右边
         //取消按钮
         closeImageObj.src = "../img/close.png";
@@ -1047,6 +1058,12 @@ $(document).ready(function () {
         addCircleImage.src = "../img/addCircle.png";
         addCircleImage.onload = () => {
             ctxPic.drawImage(addCircleImage, 0, c2.height / 2 + 300 - toolbarOffset, 30, 30)
+        }
+
+        //添加文本框
+        inputImage.src = "../img/input.png";
+        inputImage.onload = () => {
+            ctxPic.drawImage(inputImage, 0, c2.height / 2 + 330 - toolbarOffset, 30, 30)
         }
     }
 
@@ -1327,25 +1344,22 @@ $(document).ready(function () {
         ctx.stroke();
     }
 
-    //上传方法
-    function uploadNodeJS(base64URL, type, callback) {
+    //弹出选择格式框并返回选择结果和暴露方法给外部
+    function chooseType(callback) {
         let name;
         let chooseType;
         layer.open({
             title: "选择格式",
             btn: ['png', 'jpeg', 'cancle'],
             yes: function (index, layero) {
-                name = $('input').val()
                 chooseType = 'png';
                 layer.close(index);
-                //回调，获取用户输入值再上传/下载
-                callback(name, chooseType);
+                callback(chooseType, getCutPicBase64);
             },
             btn2: function (index, layero) {
-                name = $('input').val()
                 chooseType = 'jpeg';
                 layer.close(index);
-                callback(name, chooseType);
+                callback(chooseType, getCutPicBase64);
             },
             btn3: function (index, layero) {
                 layer.close(index);
@@ -1353,6 +1367,28 @@ $(document).ready(function () {
             cancel: function () {
 
             }
+        });
+    }
+
+    //上传函数(nodejs版本)
+    function uploadNodeJS(chooseType) {
+        $.post("uploadCutPic", {
+            "info": getCutPicBase64(chooseType),
+            "picType": chooseType
+        }, function (data) {
+            layer.open({
+                btn: '去下载!',
+                title: 'Your UUID',
+                content: data,
+                yes: (index, layero) => {
+                    let _href = 'findPicByUUID';
+                    $('body').append('<a href="" id="goto" target="_blank"></a>');
+                    $('#goto').attr('href', _href);
+                    $('#goto').get(0).click();
+                    $('#goto').remove();
+                    layer.close(index);
+                }
+            });
         });
     }
 });
