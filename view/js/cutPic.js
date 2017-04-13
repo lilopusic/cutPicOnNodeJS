@@ -126,6 +126,8 @@
         let downloadType;
         //下载的默认名字为cutPic
         let downloadName;
+        //输入框，恒定一个
+        let inputBox;
         //别名
         let _self = this;
         //用户自定义配置赋值
@@ -803,6 +805,8 @@
             //交换两者的z-index
             $("#pic").css("z-index", 0);
             $("#paintCanvas").css("z-index", 10);
+            paintCtx.clearRect(0, 0, paintC.width, paintC.height);
+
         }
 
         //添加边框
@@ -1250,7 +1254,7 @@
                     }
                     //输入文字
                     if (isInput) {
-                        let input = new CanvasInput({
+                        inputBox = new CanvasInput({
                             canvas: paintC,
                             fontSize: 18,
                             fontFamily: 'Arial',
@@ -1260,10 +1264,10 @@
                             x: x,
                             y: y,
                             onsubmit: () => {
-                                submitText(input);
+                                submitText();
                             }
                         });
-                        input.focus();
+                        inputBox.focus();
                         isInput = false;
                     }
                 }
@@ -1436,14 +1440,14 @@
         }
 
         //提交文字触发事件
-        function submitText(input) {
+        function submitText() {
             paintCtx.clearRect(0, 0, paintC.width, paintC.height);
             $("#pic").css("z-index", 10);
             $("#paintCanvas").css("z-index", 0);
-            ctxPic.font = input.fontSize() + "px " + input.fontColor();
-            ctxPic.strokeStyle = cutPicCanvas.waterMarkColor;
-            ctxPic.strokeText(input.value(), input.x(), input.y() + input.fontSize());
-            input.destroy();
+            ctxPic.font = inputBox.fontSize() + "px " + inputBox.fontFamily();
+            ctxPic.strokeStyle = inputBox.fontColor();
+            ctxPic.strokeText(inputBox.value(), inputBox.x(), inputBox.y() + inputBox.fontSize());
+            inputBox.destroy();
         }
 
 
