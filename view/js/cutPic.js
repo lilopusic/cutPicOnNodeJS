@@ -1,11 +1,37 @@
 /**
  * Created by hnayan on 2017-3-20.
  */
-'use strict'
 
-$(document).ready(function () {
-    //入口
-    jQuery.fn.cutPic = function (userOptions) {
+//闭包添加插件不污染环境
+(function ($) {
+
+    //严格模式
+    'use strict'
+    //插件定义
+    $.fn.cutPic = function (userOptions) {
+
+        //保护默认参数
+        userOptions = $.extend({
+            //水印信息
+            haveWaterMark: false,
+            waterMark: '',
+            waterMarkSize: 12,
+            waterMarkColor: 'green',
+            waterMarkFontStyle: 'Arial',
+            //画笔信息
+            paintColor: 'red',
+            paintWidth: 2,
+            //重载信息
+            reloadWay: 'normal',
+            //边框信息
+            borderColor: 'red',
+            borderWidth: 2,
+            //下载信息
+            downloadType: 'png',
+            downloadName: 'cutPic',
+            //上传信息
+            uploadFunc: 'nodeJs'
+        }, userOptions);
 
         //一些全局变量
         //是否按下鼠标
@@ -20,6 +46,8 @@ $(document).ready(function () {
         let isDrawCircle = false;
         //记录是否已经运行截图插件
         let alreadyRun = false;
+        //是否正在输入文字
+        let isInput = false;
         //截图区域四个顶点坐标
         let x0, y0, x1, y1;
         //添加矩形用的四个顶点坐标
@@ -95,9 +123,9 @@ $(document).ready(function () {
         let reloadWay = "simple";
         let uploadFunc = null;
         //下载的默认格式为png
-        let downloadType = 'png';
+        let downloadType;
         //下载的默认名字为cutPic
-        let downloadName = 'cutPic';
+        let downloadName;
         //别名
         let _self = this;
         //用户自定义配置赋值
@@ -338,26 +366,7 @@ $(document).ready(function () {
                 //添加文本框
                 if (x > 0 && x < 30 && y < (c2.height / 2 + 360 - toolbarOffset) && y > (c2.height / 2 + 330 - toolbarOffset)) {
                     paintInPaintCanvas();
-                    //生成输入框实例
-                    var input = new CanvasInput({
-                        canvas: paintC,
-                        fontSize: 18,
-                        fontFamily: 'Arial',
-                        fontColor: '#212121',
-                        fontWeight: 'bold',
-                        width: 300,
-                        padding: 8,
-                        borderWidth: 1,
-                        borderColor: '#000',
-                        borderRadius: 3,
-                        boxShadow: '1px 1px 0px #fff',
-                        innerShadow: '0px 0px 5px rgba(0, 0, 0, 0.5)',
-                        placeHolder: 'Enter message here...',
-                        onsubmit: () => {
-                            alert('het~')
-                        }
-                    });
-                    input.focus();
+                    isInput = true;
                 }
                 //阻止冒泡,避免了被currentDom捕捉到
                 event.stopPropagation();
@@ -766,14 +775,14 @@ $(document).ready(function () {
                 title: '输入名字并选择一种格式',
                 btn: ['png', 'jpeg', 'cancle'],
                 yes: function (index, layero) {
-                    name = $('input').val() || 'cutPic';
+                    name = $(layero).find('input').val() || downloadName;
                     chooseType = 'png';
                     layer.close(index);
                     //获取用户输入值再上传/下载
                     downloadURI(getCutPicBase64(chooseType), `${name}.${chooseType}`);
                 },
                 btn2: function (index, layero) {
-                    name = $('input').val() || 'cutPic';
+                    name = $(layero).find('input').val() || downloadName;
                     chooseType = 'jpeg';
                     layer.close(index);
                     downloadURI(getCutPicBase64(chooseType), `${name}.${chooseType}`);
@@ -1095,7 +1104,8 @@ $(document).ready(function () {
             }
         }
 
-        //绑定鼠标事件
+        //绑定鼠标移动事件
+        //包括截图框和绘画
         function bindMouseEvent() {
 
             //以下三个事件均是用来绘制截图框的
@@ -1153,6 +1163,7 @@ $(document).ready(function () {
                     isDown = true;
                     x00 = x;
                     y00 = y;
+                    //涂鸦
                     if (isDraw) {
                         paintCtx.beginPath();
                         paintCtx.moveTo(x, y);
@@ -1167,10 +1178,12 @@ $(document).ready(function () {
                     y = position.y;
                 if (x > cutPicCanvas.left && x < cutPicCanvas.left + cutPicCanvas.width &&
                     y > cutPicCanvas.top && y < cutPicCanvas.top + cutPicCanvas.height) {
+                    //涂鸦
                     if (isDraw && isDown) {
                         paintCtx.lineTo(x, y);
                         paintCtx.stroke();
                     }
+                    //画矩形
                     if (isDrawRect && isDown) {
                         x11 = x;
                         y11 = y;
@@ -1180,6 +1193,7 @@ $(document).ready(function () {
                         drawLineOnPaintC(x11, y11, x11, y00); //右
                         drawLineOnPaintC(x11, y11, x00, y11); //下
                     }
+                    //画(椭)圆形
                     if (isDrawCircle && isDown) {
                         x11 = x;
                         y11 = y;
@@ -1207,26 +1221,55 @@ $(document).ready(function () {
                 let position = getEventPosition(event);
                 let x = position.x,
                     y = position.y;
-                if (x > cutPicCanvas.left && x < cutPicCanvas + cutPicCanvas.width &&
+                if (x > cutPicCanvas.left && x < cutPicCanvas.left + cutPicCanvas.width &&
                     y > cutPicCanvas.top && y < cutPicCanvas.top + cutPicCanvas.height) {
+                    //涂鸦结束
                     if (isDraw && isDown) {
                         paintCtx.closePath();
+                        isDraw = false;
+                        $("#pic").css("z-index", 10);
+                        $("#paintCanvas").css("z-index", 0);
+                        paintOnImage();
+
                     }
+                    //画矩形结束
                     if (isDrawRect && isDown) {
+                        isDrawRect = false;
+                        $("#pic").css("z-index", 10);
+                        $("#paintCanvas").css("z-index", 0);
+                        paintOnImage();
 
                     }
+                    //画(椭)圆形结束
                     if (isDrawCircle && isDown) {
+                        isDrawCircle = false;
+                        $("#pic").css("z-index", 10);
+                        $("#paintCanvas").css("z-index", 0);
+                        paintOnImage();
 
+                    }
+                    //输入文字
+                    if (isInput) {
+                        let input = new CanvasInput({
+                            canvas: paintC,
+                            fontSize: 18,
+                            fontFamily: 'Arial',
+                            placeHolder: 'Type...',
+                            borderWidth: 0,
+                            boxShadow: 'none',
+                            x: x,
+                            y: y,
+                            onsubmit: () => {
+                                submitText(input);
+                            }
+                        });
+                        input.focus();
+                        isInput = false;
                     }
                 }
-                isDraw = false;
                 isDown = false;
-                isDrawRect = false;
-                isDrawCircle = false;
-                $("#pic").css("z-index", 10);
-                $("#paintCanvas").css("z-index", 0);
                 //将paintCanvas图层的内容复制到ctxPic上面去,曲线救国，先丢到一张图里去
-                paintOnImage();
+                paintCtx.clearRect(0, 0, paintC.width, paintC.height);
             };
         }
 
@@ -1342,7 +1385,7 @@ $(document).ready(function () {
         }
 
         //弹出选择格式框并返回选择结果和暴露方法给外部
-        function chooseType(callback) {
+        function chooseType(callback, getCutPicBase64) {
             let name;
             let chooseType;
             layer.open({
@@ -1351,6 +1394,9 @@ $(document).ready(function () {
                 yes: function (index, layero) {
                     chooseType = 'png';
                     layer.close(index);
+                    //用户自定义函数的话，只需要定义这一个callbcak，
+                    //插件会返回chooseType和一个函数用来获取base64的info
+                    //eg. uploadNodeJS
                     callback(chooseType, getCutPicBase64);
                 },
                 btn2: function (index, layero) {
@@ -1368,7 +1414,7 @@ $(document).ready(function () {
         }
 
         //上传函数(nodejs版本)
-        function uploadNodeJS(chooseType) {
+        function uploadNodeJS(chooseType, getCutPicBase64) {
             $.post("uploadCutPic", {
                 "info": getCutPicBase64(chooseType),
                 "picType": chooseType
@@ -1389,8 +1435,26 @@ $(document).ready(function () {
             });
         }
 
+        //提交文字触发事件
+        function submitText(input) {
+            paintCtx.clearRect(0, 0, paintC.width, paintC.height);
+            $("#pic").css("z-index", 10);
+            $("#paintCanvas").css("z-index", 0);
+            ctxPic.font = input.fontSize() + "px " + input.fontColor();
+            ctxPic.strokeStyle = cutPicCanvas.waterMarkColor;
+            ctxPic.strokeText(input.value(), input.x(), input.y() + input.fontSize());
+            input.destroy();
+        }
+
+
+        //后期优化
+        function drawCanvas(cutPicCanvas) {
+            //使用属性画出图
+        }
+
+
         //链式调用
         return _self;
     };
 
-});
+})(jQuery);
