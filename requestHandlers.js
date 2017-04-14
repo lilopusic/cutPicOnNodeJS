@@ -1,7 +1,18 @@
 var querystring = require("querystring"),
   fs = require("fs"),
   formidable = require("formidable"),
-  uuidV4 = require("uuid/v4");
+  uuidV4 = require("uuid/v4"),
+  Sequelize = require("sequelize");
+
+//建立与数据库链接
+var sequelize = new Sequelize('mysql://root:yanghan123@127.0.0.1:3306/cutPic');
+var CutPic = sequelize.define('upload_pic', {
+  'uuid': Sequelize.STRING,
+  'path': Sequelize.STRING,
+  'type': Sequelize.STRING
+}, {
+  timestamps: false
+});
 
 function start(response) {
   var body = '<html>' +
@@ -86,6 +97,17 @@ function uploadCutPic(response, request) {
       }
     }
 
+    //写入数据库
+    (async() => {
+      let aCutPic = await CutPic.create({
+        uuid: uuid,
+        path: 'tmp',
+        type: picType
+      });
+      console.log('created: ' + JSON.stringify(aCutPic));
+    })();
+
+
     fs.writeFileSync(`tmp/${uuid}.${picType}`, picInfo, 'base64', function (err) {
       console.log(err);
     });
@@ -94,9 +116,52 @@ function uploadCutPic(response, request) {
 }
 
 function findPicByUUID(response, request) {
-  response.end("welcome~");
+  fs.createReadStream(`${__dirname}/view/html/findByUUID.html`).pipe(response);
 }
 
+function getImg(response, request) {
+  var postData = '';
+  // 注册监听, 接收数据块
+  request.addListener("data", function (postDataChunk) {
+    postData += postDataChunk;
+  });
+  // 数据接收完毕, 执行回调函数
+  request.addListener("end", function () {
+    let params = querystring.parse(postData); //解析 HEADER 中的数据
+    let uuid = params.UUID;
+    (async() => {
+      let cutpic = await CutPic.findOne({
+        where: {
+          uuid: uuid
+        }
+      });
+      if (cutpic !== null) {
+        let path = cutpic.get('path');
+        let name = cutpic.get('uuid');
+        let type = cutpic.get('type');
+        // read binary data
+        let bitmap = fs.readFileSync(`${path}/${name}.${type}`);
+        // convert binary data to base64 encoded string
+        response.end(`data:image/${type};base64,` + new Buffer(bitmap).toString('base64'));
+      }else {
+        let bitmap = fs.readFileSync(`view/img/notfound.png`);
+        response.end(`data:image/png;base64,` + new Buffer(bitmap).toString('base64'));
+      }
+
+    })();
+
+
+  });
+
+}
+
+
 module.exports = {
-  start, upload, show, cutPicDemo, uploadCutPic, findPicByUUID
+  start,
+  upload,
+  show,
+  cutPicDemo,
+  uploadCutPic,
+  findPicByUUID,
+  getImg
 }

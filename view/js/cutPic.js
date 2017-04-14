@@ -21,6 +21,10 @@
             //画笔信息
             paintColor: 'red',
             paintWidth: 2,
+            //输入框信息
+            inputFontSize: 18,
+            inputFontColor: 'red',
+            inputFontFamily: 'Arial',
             //重载信息
             reloadWay: 'normal',
             //边框信息
@@ -115,8 +119,6 @@
         };
         //目前的dom对象
         let currentDom;
-        //用户配置项对象
-        let options;
         //工具栏的偏移距离
         let toolbarOffset = 150;
         //记录重载的方式,默认simple
@@ -130,8 +132,6 @@
         let inputBox;
         //别名
         let _self = this;
-        //用户自定义配置赋值
-        options = userOptions;
         //上传回调函数独立出来
         uploadFunc = userOptions.uploadFunc || function () {
             alert("you have not define a func");
@@ -154,16 +154,16 @@
             }
         }
         //下载格式独立出来
-        downloadType = options.downloadType || 'png';
+        downloadType = userOptions.downloadType;
 
         //下载名字也独立出来
-        downloadName = options.downloadName || 'cutPic';
+        downloadName = userOptions.downloadName;
         //获得当前Dom
         currentDom = this.get(0);
 
-        paintCanvasInfo.paintColor = options.paintColor || "red";
-        paintCanvasInfo.paintWidth = options.paintWidth || 2;
-        reloadWay = options.reloadWay || "simple";
+        paintCanvasInfo.paintColor = userOptions.paintColor;
+        paintCanvasInfo.paintWidth = userOptions.paintWidth;
+        reloadWay = userOptions.reloadWay;
         //绑定点击事件,这里只有一个作用,就是点击之后进入截图
         currentDom.onclick = (event) => {
             //只有第一次会调用，防止多次调用
@@ -263,14 +263,14 @@
             cutPicCanvas.top = top;
             cutPicCanvas.isHorizontal = false;
             cutPicCanvas.isVertical = false;
-            cutPicCanvas.haveWaterMark = options.haveWaterMark || false;
-            cutPicCanvas.waterMark = options.waterMark || null;
-            cutPicCanvas.waterMarkSize = options.waterMarkSize || 0;
-            cutPicCanvas.waterMarkFontStyle = options.waterMarkFontStyle || "Arial";
-            cutPicCanvas.mosaicType = options.mosaicType || null;
-            cutPicCanvas.waterMarkColor = options.waterMarkColor || "black";
-            cutPicCanvas.borderColor = options.borderColor || "red";
-            cutPicCanvas.borderWidth = options.borderWidth || 1;
+            cutPicCanvas.haveWaterMark = userOptions.haveWaterMark || false;
+            cutPicCanvas.waterMark = userOptions.waterMark || null;
+            cutPicCanvas.waterMarkSize = userOptions.waterMarkSize || 0;
+            cutPicCanvas.waterMarkFontStyle = userOptions.waterMarkFontStyle || "Arial";
+            cutPicCanvas.mosaicType = userOptions.mosaicType || null;
+            cutPicCanvas.waterMarkColor = userOptions.waterMarkColor || "black";
+            cutPicCanvas.borderColor = userOptions.borderColor || "red";
+            cutPicCanvas.borderWidth = userOptions.borderWidth || 1;
             cutPicCanvas.zoom = 1;
             step = 0;
             ctxPic.drawImage(image, x0, y0, cutPicWidth, cutPicHeight,
@@ -757,6 +757,11 @@
 
         //取消截图并回到原网页
         function backToSource() {
+            //变量重新初始化
+            cutPicCanvas = {};
+            cutPicHeight = 0;
+            cutPicWidth = 0;
+            step = 0;
             //返回并重新绑定事件
             switch (reloadWay) {
                 case "simple":
@@ -1256,8 +1261,9 @@
                     if (isInput) {
                         inputBox = new CanvasInput({
                             canvas: paintC,
-                            fontSize: 18,
-                            fontFamily: 'Arial',
+                            fontSize: userOptions.inputFontSize,
+                            fontFamily: userOptions.inputFontFamily,
+                            fontColor: userOptions.inputFontColor,
                             placeHolder: 'Type...',
                             borderWidth: 0,
                             boxShadow: 'none',
@@ -1433,7 +1439,6 @@
                         $('#goto').attr('href', _href);
                         $('#goto').get(0).click();
                         $('#goto').remove();
-                        layer.close(index);
                     }
                 });
             });

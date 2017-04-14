@@ -26,54 +26,59 @@
         </div>
     </div>
     <script>
-        var option = {
-            //是否带有水印&&水印信息
-            haveWaterMark: true,
-            waterMark: "byHnayan",
-            waterMarkSize: 14,
-            waterMarkFontStyle: "Arial",
-            waterMarkColor: "green",
-
-            //画笔信息
-            paintColor: "blue",
-            paintWidth: 3,
-            //重载方式
-            //simple为区域内使用js重载，不会涉及到服务器
-            //normal直接重载整个网页,会从服务器重新拉网页
-            reloadWay: "simple",
-            //边框信息
-            borderColor: "red",
-            borderWidth: 3,
-            //保存格式信息
-            downloadType: "jpeg",
-            //上传回调函数,直接定义函数或是使用内置上传功能
-            //如果自己提供函数，插件会返回type,调用getCutPicBase64(type来获得baseURL)
-            //eg1:uploadFunc : (type) => {todo};
-            //eg2:uploadFunc : 'nodeJS'
-            // uploadFunc: (chooseType, getBaseFunc) => {
-            //     $.post("uploadCutPic", {
-            //         "info": getBaseFunc(chooseType),
-            //         "picType": chooseType
-            //     }, function (data) {
-            //         layer.open({
-            //             btn: '去下载!',
-            //             title: 'Your UUID',
-            //             content: data,
-            //             yes: (index, layero) => {
-            //                 let _href = 'findPicByUUID';
-            //                 $('body').append('<a href="" id="goto" target="_blank"></a>');
-            //                 $('#goto').attr('href', _href);
-            //                 $('#goto').get(0).click();
-            //                 $('#goto').remove();
-            //                 layer.close(index);
-            //             }
-            //         });
-            //     });
-            // }
-            uploadFunc: 'nodeJS'
-
-        };
         $(document).ready(function () {
+            var option = {
+                //是否带有水印&&水印信息
+                haveWaterMark: true,
+                waterMark: "byHnayan",
+                waterMarkSize: 14,
+                waterMarkFontStyle: "Arial",
+                waterMarkColor: "green",
+
+                //画笔信息
+                paintColor: "blue",
+                paintWidth: 3,
+
+                //输入框信息
+                inputFontSize:18,
+                inputFontColor:'red',
+                inputFontFamily:'Arial',
+                //重载方式
+                //simple为区域内使用js重载，不会涉及到服务器
+                //normal直接重载整个网页,会从服务器重新拉网页
+                reloadWay: "simple",
+                //边框信息
+                borderColor: "red",
+                borderWidth: 3,
+                //保存格式信息
+                downloadType: "jpeg",
+                //上传回调函数,直接定义函数或是使用内置上传功能
+                //如果自己提供函数，插件会返回type,调用getCutPicBase64(type来获得baseURL)
+                //eg1:uploadFunc : (type) => {todo};
+                //eg2:uploadFunc : 'nodeJS'
+                // uploadFunc: (chooseType, getBaseFunc) => {
+                //     $.post("uploadCutPic", {
+                //         "info": getBaseFunc(chooseType),
+                //         "picType": chooseType
+                //     }, function (data) {
+                //         layer.open({
+                //             btn: '去下载!',
+                //             title: 'Your UUID',
+                //             content: data,
+                //             yes: (index, layero) => {
+                //                 let _href = 'findPicByUUID';
+                //                 $('body').append('<a href="" id="goto" target="_blank"></a>');
+                //                 $('#goto').attr('href', _href);
+                //                 $('#goto').get(0).click();
+                //                 $('#goto').remove();
+                //                 layer.close(index);
+                //             }
+                //         });
+                //     });
+                // }
+                uploadFunc: 'nodeJS'
+
+            };
             //截图工具区域的大小就是调用插件的元素的大小；如这里就是1000px,auto(自动获取);
             var cutInstance = $("#area").cutPic(option);
         });

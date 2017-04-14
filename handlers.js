@@ -8,5 +8,5 @@ handle["/show"] = requestHandlers.show;
 handle["/cutPicDemo"] = requestHandlers.cutPicDemo;
 handle["/uploadCutPic"] = requestHandlers.uploadCutPic;
 handle["/findPicByUUID"] = requestHandlers.findPicByUUID;
-
+handle["/getImg"] = requestHandlers.getImg;
 module.exports = handle;

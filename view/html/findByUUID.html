@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
+    <title>find your pic</title>
+
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" crossorigin="anonymous">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="../layer/layer.js"></script>
+
+</head>
+
+<body>
+    <div>
+        <form class="form-inline">
+            <div class="form-group">
+                <label for="uuid">UUID:</label>
+                <input type="text" class="form-control" id="uuid" placeholder="input your uuid">
+            </div>
+            <button id="go" class="btn btn-primary">Find！</button>
+        </form>
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('#go').click((event) => {
+                event.preventDefault();
+                $.post("getImg", {
+                    'UUID': $('#uuid').val()
+                }, function (data) {
+                    //有bug，需要自行修复位置偏移和强制设置宽高
+                    var index = layer.open({
+                        id: 'layerH',
+                        content: `<img id='pic' src=${data}>`,
+                        btn: '下载！',
+                        maxmin: true,
+                        title: 'YOUR PIC',
+                        offset: 'lt',
+                        area: ['initial', ''],
+                        shadeClose: true, //点击遮罩关闭
+                        anim: 4,
+                        yes: function () {
+                            let link = document.createElement("a");
+                            link.download = 'cutPic';
+                            link.href = $('#pic').attr('src');
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            $(link).remove();
+                        }
+                    });
+                });
+                //style='clear:both;display:block;margin:auto;' 
+            });
+        });
+    </script>
+
+</body>
+
+</html>
