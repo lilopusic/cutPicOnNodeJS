@@ -4,7 +4,6 @@
   "description": "cutpic deploy on nodejs",
   "main": "index.js",
   "dependencies": {
-    "eslint": "^3.19.0",
     "formidable": "^1.1.1",
     "mysql": "^2.13.0",
     "sequelize": "^3.30.4",
