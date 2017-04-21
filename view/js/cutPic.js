@@ -1,7 +1,6 @@
 /**
  * Created by hnayan on 2017-3-20.
  */
-
 //闭包添加插件不污染环境
 (function ($) {
 
