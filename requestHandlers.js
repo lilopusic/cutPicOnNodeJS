@@ -99,12 +99,16 @@ function uploadCutPic(response, request) {
 
     //写入数据库
     (async() => {
-      let aCutPic = await CutPic.create({
-        uuid: uuid,
-        path: 'tmp',
-        type: picType
-      });
-      console.log('created: ' + JSON.stringify(aCutPic));
+      try {
+        let aCutPic = await CutPic.create({
+          uuid: uuid,
+          path: 'tmp',
+          type: picType
+        });
+      } catch (err) {
+        console.log(`can't connect db.`);
+      }
+
     })();
 
 
@@ -130,22 +134,26 @@ function getImg(response, request) {
     let params = querystring.parse(postData); //解析 HEADER 中的数据
     let uuid = params.UUID;
     (async() => {
-      let cutpic = await CutPic.findOne({
-        where: {
-          uuid: uuid
+      try {
+        let cutpic = await CutPic.findOne({
+          where: {
+            uuid: uuid
+          }
+        });
+        if (cutpic !== null) {
+          let path = cutpic.get('path');
+          let name = cutpic.get('uuid');
+          let type = cutpic.get('type');
+          // read binary data
+          let bitmap = fs.readFileSync(`${path}/${name}.${type}`);
+          // convert binary data to base64 encoded string
+          response.end(`data:image/${type};base64,` + new Buffer(bitmap).toString('base64'));
+        } else {
+          let bitmap = fs.readFileSync(`view/img/notfound.png`);
+          response.end(`data:image/png;base64,` + new Buffer(bitmap).toString('base64'));
         }
-      });
-      if (cutpic !== null) {
-        let path = cutpic.get('path');
-        let name = cutpic.get('uuid');
-        let type = cutpic.get('type');
-        // read binary data
-        let bitmap = fs.readFileSync(`${path}/${name}.${type}`);
-        // convert binary data to base64 encoded string
-        response.end(`data:image/${type};base64,` + new Buffer(bitmap).toString('base64'));
-      }else {
-        let bitmap = fs.readFileSync(`view/img/notfound.png`);
-        response.end(`data:image/png;base64,` + new Buffer(bitmap).toString('base64'));
+      } catch (err) {
+        console.log(`can't connect db.`);
       }
 
     })();
