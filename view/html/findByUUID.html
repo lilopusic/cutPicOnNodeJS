@@ -7,34 +7,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- 上述3个meta标签*必须*放在最前面，任何其他内容都*必须*跟随其后！ -->
     <title>find your pic</title>
+    <script type="text/javascript" src="../cutPicJsAll/third/jquery-3.2.0.min.js"></script>
+    <script type="text/javascript" src="../cutPicJsAll/third/layer/layer.js"></script>
+    <style>
+        #uuid {
+            height: 25px;
+            display: block;
+            background-color: wheat;
+            float: left;
+            border: none;
+        }
 
-    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-    <link rel="stylesheet" href="../bootstrap-3.3.7/css/bootstrap.min.css">
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="../js/jquery-3.2.0.min.js"></script>
-    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
-    <script src="../bootstrap-3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../layer/layer.js"></script>
-
+        .btn {
+            cursor: pointer;
+            float: left;
+            background-color: goldenrod;
+            margin-left: 10px;
+            height: 27px;
+           
+        }
+    </style>
 </head>
 
 <body>
-    <div style="text-align:center;margin-top: 100px;">
-        <form class="form-inline">
-            <div class="form-group">
-                <label for="uuid">UUID:</label>
-                <input type="text" class="form-control" id="uuid" placeholder="input your uuid">
-            </div>
-            <button id="go" class="btn btn-primary">Find！</button>
-        </form>
-    </div>
+    <input type="text" id="uuid" placeholder="input your uuid">
+    <div id="go" class="btn">Find！</div>
 
     <script>
         $(document).ready(function () {

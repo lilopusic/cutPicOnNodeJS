@@ -5,11 +5,9 @@
     <meta>
     <meta name="layout" content="main">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <script type="text/javascript" src="../js/jquery-3.2.0.min.js"></script>
-    <script type="text/javascript" src="../js/html2canvas.js"></script>
-    <script type="text/javascript" src="../layer/layer.js"></script>
-    <script type="text/javascript" src="../js/CanvasInput.js"></script>
-    <script type="text/javascript" src="../js/cutPic.js"></script>
+    <script type="text/javascript" src="../cutPicJsAll/third/jquery-3.2.0.min.js"></script>
+    <script type="text/javascript" src="../cutPicJsAll/third/layer/layer.js"></script>
+    <script type="text/javascript" src="../cutPicJsAll/cutPic.js"></script>
 </head>
 
 <body>
@@ -40,9 +38,9 @@
                 paintWidth: 3,
 
                 //输入框信息
-                inputFontSize:18,
-                inputFontColor:'red',
-                inputFontFamily:'Arial',
+                inputFontSize: 18,
+                inputFontColor: 'red',
+                inputFontFamily: 'Arial',
                 //重载方式
                 //simple为区域内使用js重载，不会涉及到服务器
                 //normal直接重载整个网页,会从服务器重新拉网页
@@ -81,6 +79,7 @@
             };
             //截图工具区域的大小就是调用插件的元素的大小；如这里就是1000px,auto(自动获取);
             var cutInstance = $("#area").cutPic(option);
+
         });
     </script>
 </body>
